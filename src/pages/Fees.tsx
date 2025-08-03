@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Plus, Edit, Trash2, DollarSign, Calendar } from 'lucide-react';
+import { NewFeeDialog } from '@/components/dialogs/NewFeeDialog';
+import { useToast } from '@/hooks/use-toast';
 
 export default function FeesPage() {
-  const fees = [
+  const [fees, setFees] = useState([
     { 
       id: '1', 
       type: 'Administración', 
@@ -51,7 +53,33 @@ export default function FeesPage() {
       status: 'Inactiva',
       lastUpdate: '2023-10-15'
     },
-  ];
+  ]);
+  const { toast } = useToast();
+
+  const handleNewFee = (newFee: any) => {
+    setFees([...fees, newFee]);
+  };
+
+  const handleApplyMonthlyFees = () => {
+    toast({
+      title: "Cuotas aplicadas",
+      description: "Se han generado los cobros mensuales para todos los apartamentos",
+    });
+  };
+
+  const handleCreateFine = () => {
+    toast({
+      title: "Función disponible",
+      description: "Use 'Nueva Tarifa' y seleccione tipo 'Multa'",
+    });
+  };
+
+  const handleCreateExtraCharge = () => {
+    toast({
+      title: "Función disponible", 
+      description: "Use 'Nueva Tarifa' y seleccione frecuencia 'Única'",
+    });
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -83,10 +111,7 @@ export default function FeesPage() {
           <Button variant="outline" size="sm">
             Historial
           </Button>
-          <Button variant="default" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Nueva Tarifa
-          </Button>
+          <NewFeeDialog onFeeCreated={handleNewFee} />
         </div>
       </div>
 
@@ -211,7 +236,7 @@ export default function FeesPage() {
             <p className="text-sm text-muted-foreground mb-4">
               Generar cobros de administración para todos los apartamentos
             </p>
-            <Button variant="default" size="sm" className="w-full">
+            <Button variant="default" size="sm" className="w-full" onClick={handleApplyMonthlyFees}>
               Aplicar Cuotas
             </Button>
           </CardContent>
@@ -224,7 +249,7 @@ export default function FeesPage() {
             <p className="text-sm text-muted-foreground mb-4">
               Aplicar multa específica a uno o varios apartamentos
             </p>
-            <Button variant="outline" size="sm" className="w-full">
+            <Button variant="outline" size="sm" className="w-full" onClick={handleCreateFine}>
               Nueva Multa
             </Button>
           </CardContent>
@@ -237,7 +262,7 @@ export default function FeesPage() {
             <p className="text-sm text-muted-foreground mb-4">
               Crear cobro especial para mantenimientos o mejoras
             </p>
-            <Button variant="outline" size="sm" className="w-full">
+            <Button variant="outline" size="sm" className="w-full" onClick={handleCreateExtraCharge}>
               Crear Cobro
             </Button>
           </CardContent>

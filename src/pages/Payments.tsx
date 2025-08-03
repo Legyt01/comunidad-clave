@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, Plus, Filter, Download, TrendingUp, Building } from 'lucide-react';
+import { NewChargeDialog } from '@/components/dialogs/NewChargeDialog';
+import { generatePaymentsReport, downloadCSV, downloadPDF } from '@/utils/reportGenerator';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PaymentsPage() {
-  const payments = [
+  const [payments, setPayments] = useState([
     { 
       id: '1', 
       date: '2024-01-15', 
@@ -56,7 +59,29 @@ export default function PaymentsPage() {
       status: 'Vencido',
       method: '-'
     },
-  ];
+  ]);
+  const { toast } = useToast();
+
+  const handleNewCharge = (newCharge: any) => {
+    setPayments([newCharge, ...payments]);
+  };
+
+  const handleExportReport = () => {
+    const report = generatePaymentsReport(payments);
+    downloadPDF(report);
+    toast({
+      title: "Reporte generado",
+      description: "El reporte de pagos se ha descargado exitosamente",
+    });
+  };
+
+  const handleExportCSV = () => {
+    downloadCSV(payments, 'pagos_torres_del_valle');
+    toast({
+      title: "Datos exportados",
+      description: "Los datos se han exportado a CSV exitosamente",
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -83,18 +108,15 @@ export default function PaymentsPage() {
           <p className="text-muted-foreground">Administra todos los pagos del conjunto residencial</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
             <Filter className="w-4 h-4 mr-2" />
-            Filtrar
+            Exportar CSV
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleExportReport}>
             <Download className="w-4 h-4 mr-2" />
-            Exportar
+            Generar Reporte
           </Button>
-          <Button variant="default" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Cobro
-          </Button>
+          <NewChargeDialog onChargeCreated={handleNewCharge} />
         </div>
       </div>
 

@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Users, Plus, Search, Filter, Building, Mail, Phone } from 'lucide-react';
+import { NewUserDialog } from '@/components/dialogs/NewUserDialog';
+import { generateUsersReport, downloadPDF } from '@/utils/reportGenerator';
+import { useToast } from '@/hooks/use-toast';
 
 export default function UsersPage() {
-  const users = [
+  const [users, setUsers] = useState([
     { 
       id: '1', 
       name: 'María González', 
@@ -56,7 +59,21 @@ export default function UsersPage() {
       role: 'Propietario',
       balance: '$2,400,000'
     },
-  ];
+  ]);
+  const { toast } = useToast();
+
+  const handleNewUser = (newUser: any) => {
+    setUsers([...users, newUser]);
+  };
+
+  const handleGenerateReport = () => {
+    const report = generateUsersReport(users);
+    downloadPDF(report);
+    toast({
+      title: "Reporte generado",
+      description: "El reporte de usuarios se ha descargado exitosamente",
+    });
+  };
 
   const getStatusColor = (status: string) => {
     return status === 'Activo' 
@@ -78,18 +95,15 @@ export default function UsersPage() {
           <p className="text-muted-foreground">Administra los propietarios del conjunto residencial</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleGenerateReport}>
             <Search className="w-4 h-4 mr-2" />
-            Buscar
+            Generar Reporte
           </Button>
           <Button variant="outline" size="sm">
             <Filter className="w-4 h-4 mr-2" />
             Filtrar
           </Button>
-          <Button variant="default" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Usuario
-          </Button>
+          <NewUserDialog onUserCreated={handleNewUser} />
         </div>
       </div>
 

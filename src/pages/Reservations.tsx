@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Plus, Filter, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { NewReservationDialog } from '@/components/dialogs/NewReservationDialog';
+import { generateReservationsReport, downloadPDF } from '@/utils/reportGenerator';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Reservations() {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string>('');
-
-  const reservations = [
+  const [reservations, setReservations] = useState([
     { 
       id: '1', 
       date: '2024-01-20', 
@@ -50,7 +52,41 @@ export default function Reservations() {
       status: 'Completada', 
       attendees: 20 
     },
-  ];
+  ]);
+  const { toast } = useToast();
+
+  const handleNewReservation = (newReservation: any) => {
+    setReservations([...reservations, newReservation]);
+  };
+
+  const handleApproveReservation = (id: string) => {
+    setReservations(reservations.map(r => 
+      r.id === id ? { ...r, status: 'Aprobada' } : r
+    ));
+    toast({
+      title: "Reserva aprobada",
+      description: "La solicitud de reserva ha sido aprobada exitosamente",
+    });
+  };
+
+  const handleRejectReservation = (id: string) => {
+    setReservations(reservations.map(r => 
+      r.id === id ? { ...r, status: 'Rechazada' } : r
+    ));
+    toast({
+      title: "Reserva rechazada",
+      description: "La solicitud de reserva ha sido rechazada",
+    });
+  };
+
+  const handleGenerateReport = () => {
+    const report = generateReservationsReport(reservations);
+    downloadPDF(report);
+    toast({
+      title: "Reporte generado",
+      description: "El reporte de reservas se ha descargado exitosamente",
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -86,18 +122,15 @@ export default function Reservations() {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleGenerateReport}>
             <Filter className="w-4 h-4 mr-2" />
-            Filtrar
+            Generar Reporte
           </Button>
           <Button variant="outline" size="sm">
             <Calendar className="w-4 h-4 mr-2" />
-            Calendario
+            Ver Calendario
           </Button>
-          <Button variant="default" size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Nueva Reserva
-          </Button>
+          <NewReservationDialog onReservationCreated={handleNewReservation} />
         </div>
       </div>
 
@@ -200,10 +233,10 @@ export default function Reservations() {
                 <div className="flex space-x-2">
                   {user?.role === 'admin' && reservation.status === 'Pendiente' && (
                     <>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleRejectReservation(reservation.id)}>
                         Rechazar
                       </Button>
-                      <Button variant="default" size="sm">
+                      <Button variant="default" size="sm" onClick={() => handleApproveReservation(reservation.id)}>
                         Aprobar
                       </Button>
                     </>
