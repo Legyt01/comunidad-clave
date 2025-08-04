@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, Plus, Filter, Download, TrendingUp, Building } from 'lucide-react';
 import { NewChargeDialog } from '@/components/dialogs/NewChargeDialog';
+import { PaymentDetailsDialog } from '@/components/dialogs/PaymentDetailsDialog';
 import { generatePaymentsReport, downloadCSV, downloadPDF } from '@/utils/reportGenerator';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,7 +18,8 @@ export default function PaymentsPage() {
       concept: 'Administración Enero', 
       amount: '$1,200,000', 
       status: 'Pagado',
-      method: 'Transferencia'
+      method: 'Transferencia',
+      month: 'Enero 2024'
     },
     { 
       id: '2', 
@@ -27,7 +29,8 @@ export default function PaymentsPage() {
       concept: 'Administración Enero', 
       amount: '$1,200,000', 
       status: 'Pendiente',
-      method: '-'
+      method: '-',
+      month: 'Enero 2024'
     },
     { 
       id: '3', 
@@ -37,7 +40,8 @@ export default function PaymentsPage() {
       concept: 'Administración Enero', 
       amount: '$1,350,000', 
       status: 'Pagado',
-      method: 'Efectivo'
+      method: 'Efectivo',
+      month: 'Enero 2024'
     },
     { 
       id: '4', 
@@ -47,7 +51,8 @@ export default function PaymentsPage() {
       concept: 'Administración Enero', 
       amount: '$1,200,000', 
       status: 'Pagado',
-      method: 'Cheque'
+      method: 'Cheque',
+      month: 'Enero 2024'
     },
     { 
       id: '5', 
@@ -57,7 +62,8 @@ export default function PaymentsPage() {
       concept: 'Multa por ruido', 
       amount: '$150,000', 
       status: 'Vencido',
-      method: '-'
+      method: '-',
+      month: 'Diciembre 2023'
     },
   ]);
   const { toast } = useToast();
@@ -217,9 +223,11 @@ export default function PaymentsPage() {
                       <Download className="w-4 h-4" />
                     </Button>
                   )}
-                  <Button variant="outline" size="sm">
-                    Ver Detalles
-                  </Button>
+                  <PaymentDetailsDialog payment={payment}>
+                    <Button variant="outline" size="sm">
+                      Ver Detalles
+                    </Button>
+                  </PaymentDetailsDialog>
                   {payment.status !== 'Pagado' && (
                     <Button variant="default" size="sm">
                       Gestionar

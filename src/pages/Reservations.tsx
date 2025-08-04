@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Plus, Filter, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { NewReservationDialog } from '@/components/dialogs/NewReservationDialog';
+import { ReservationDetailsDialog } from '@/components/dialogs/ReservationDetailsDialog';
 import { generateReservationsReport, downloadPDF } from '@/utils/reportGenerator';
 import { useToast } from '@/hooks/use-toast';
 
@@ -122,10 +123,12 @@ export default function Reservations() {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm" onClick={handleGenerateReport}>
-            <Filter className="w-4 h-4 mr-2" />
-            Generar Reporte
-          </Button>
+          {user?.role === 'admin' && (
+            <Button variant="outline" size="sm" onClick={handleGenerateReport}>
+              <Filter className="w-4 h-4 mr-2" />
+              Generar Reporte
+            </Button>
+          )}
           <Button variant="outline" size="sm">
             <Calendar className="w-4 h-4 mr-2" />
             Ver Calendario
@@ -246,9 +249,11 @@ export default function Reservations() {
                       Editar
                     </Button>
                   )}
-                  <Button variant="outline" size="sm">
-                    Ver Detalles
-                  </Button>
+                  <ReservationDetailsDialog reservation={reservation}>
+                    <Button variant="outline" size="sm">
+                      Ver Detalles
+                    </Button>
+                  </ReservationDetailsDialog>
                 </div>
               </div>
             ))}

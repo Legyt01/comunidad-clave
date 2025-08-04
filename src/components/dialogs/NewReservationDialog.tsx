@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface NewReservationDialogProps {
   onReservationCreated?: (reservation: any) => void;
@@ -20,7 +21,9 @@ export function NewReservationDialog({ onReservationCreated }: NewReservationDia
     endTime: '',
     event: '',
     attendees: '',
-    description: ''
+    description: '',
+    apartment: '',
+    owner: ''
   });
   const { toast } = useToast();
   const { user } = useAuth();
@@ -32,10 +35,10 @@ export function NewReservationDialog({ onReservationCreated }: NewReservationDia
       id: Date.now().toString(),
       date: formData.date,
       time: `${formData.startTime} - ${formData.endTime}`,
-      apartment: user?.apartment || 'Torre A - 301',
-      owner: user?.name || 'Usuario',
+      apartment: user?.role === 'admin' ? formData.apartment : user?.apartment || 'Torre A - 301',
+      owner: user?.role === 'admin' ? formData.owner : user?.name || 'Usuario',
       event: formData.event,
-      status: 'Pendiente',
+      status: user?.role === 'admin' ? 'Aprobada' : 'Pendiente',
       attendees: parseInt(formData.attendees)
     };
 
@@ -52,7 +55,9 @@ export function NewReservationDialog({ onReservationCreated }: NewReservationDia
       endTime: '',
       event: '',
       attendees: '',
-      description: ''
+      description: '',
+      apartment: '',
+      owner: ''
     });
     setOpen(false);
   };
@@ -106,6 +111,36 @@ export function NewReservationDialog({ onReservationCreated }: NewReservationDia
               />
             </div>
           </div>
+          
+          {user?.role === 'admin' && (
+            <>
+              <div>
+                <Label htmlFor="apartment">Apartamento</Label>
+                <Select value={formData.apartment} onValueChange={(value) => setFormData({...formData, apartment: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un apartamento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Torre A - 301">Torre A - 301</SelectItem>
+                    <SelectItem value="Torre A - 302">Torre A - 302</SelectItem>
+                    <SelectItem value="Torre B - 105">Torre B - 105</SelectItem>
+                    <SelectItem value="Torre B - 205">Torre B - 205</SelectItem>
+                    <SelectItem value="Torre C - 202">Torre C - 202</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="owner">Propietario</Label>
+                <Input
+                  id="owner"
+                  placeholder="Nombre del propietario"
+                  value={formData.owner}
+                  onChange={(e) => setFormData({...formData, owner: e.target.value})}
+                  required
+                />
+              </div>
+            </>
+          )}
           
           <div>
             <Label htmlFor="event">Tipo de evento</Label>

@@ -70,10 +70,10 @@ export function AdminDashboard() {
           <p className="text-muted-foreground">Gestiona todas las operaciones del conjunto residencial</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => window.location.href = '/payments'}>
             Generar Reporte
           </Button>
-          <Button variant="default" size="sm">
+          <Button variant="default" size="sm" onClick={() => window.location.href = '/fees'}>
             Nuevo Cobro
           </Button>
         </div>
@@ -115,7 +115,7 @@ export function AdminDashboard() {
                 </CardTitle>
                 <CardDescription>Últimos movimientos de administración</CardDescription>
               </div>
-              <Button variant="outline" size="sm">Ver todos</Button>
+              <Button variant="outline" size="sm" onClick={() => window.location.href = '/payments'}>Ver todos</Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -154,7 +154,7 @@ export function AdminDashboard() {
                 </CardTitle>
                 <CardDescription>Reservas del salón social</CardDescription>
               </div>
-              <Button variant="outline" size="sm">Gestionar</Button>
+              <Button variant="outline" size="sm" onClick={() => window.location.href = '/reservations'}>Gestionar</Button>
             </div>
           </CardHeader>
           <CardContent>
