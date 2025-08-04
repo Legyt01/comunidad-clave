@@ -2,16 +2,20 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Plus, Filter, MapPin } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MapPin, Plus, Filter, Download, Calendar as CalendarIcon, CheckCircle, XCircle, Eye, Clock } from 'lucide-react';
 import { NewReservationDialog } from '@/components/dialogs/NewReservationDialog';
 import { ReservationDetailsDialog } from '@/components/dialogs/ReservationDetailsDialog';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { generateReservationsReport, downloadPDF } from '@/utils/reportGenerator';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
-export default function Reservations() {
-  const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState<string>('');
+const localizer = momentLocalizer(moment);
+
+export default function ReservationsPage() {
   const [reservations, setReservations] = useState([
     { 
       id: '1', 
@@ -55,6 +59,22 @@ export default function Reservations() {
     },
   ]);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Convert reservations to calendar events
+  const calendarEvents = reservations.map(reservation => {
+    const [startTime, endTime] = reservation.time.split(' - ');
+    const startDateTime = moment(`${reservation.date} ${startTime}`, 'YYYY-MM-DD HH:mm').toDate();
+    const endDateTime = moment(`${reservation.date} ${endTime}`, 'YYYY-MM-DD HH:mm').toDate();
+    
+    return {
+      id: reservation.id,
+      title: `${reservation.event} - ${reservation.apartment}`,
+      start: startDateTime,
+      end: endDateTime,
+      resource: reservation
+    };
+  });
 
   const handleNewReservation = (newReservation: any) => {
     setReservations([...reservations, newReservation]);
@@ -129,29 +149,37 @@ export default function Reservations() {
               Generar Reporte
             </Button>
           )}
-          <Button variant="outline" size="sm">
-            <Calendar className="w-4 h-4 mr-2" />
-            Ver Calendario
-          </Button>
           <NewReservationDialog onReservationCreated={handleNewReservation} />
         </div>
       </div>
 
-      {/* Facility Info */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center">
-              <MapPin className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground">Salón Social Torres del Valle</h3>
-              <p className="text-sm text-muted-foreground">Capacidad: 50 personas • Horario: 8:00 AM - 11:00 PM</p>
-              <p className="text-sm text-muted-foreground">Incluye: Sonido básico, mesas, sillas, cocina</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Tabs for List and Calendar View */}
+      <Tabs defaultValue="list" className="w-full">
+        <TabsList>
+          <TabsTrigger value="list">Lista de Reservas</TabsTrigger>
+          <TabsTrigger value="calendar">Calendario</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="list" className="space-y-6">
+          {/* Social Hall Info */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center">
+                  <MapPin className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Salón Social Torres del Valle</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+                    <span>Capacidad: 50 personas</span>
+                    <span>Horario: 8:00 AM - 11:00 PM</span>
+                    <span>Incluye: Sonido básico, mesas, sillas, cocina</span>
+                    <span>Depósito: $200,000</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
       {/* Stats for Admin */}
       {user?.role === 'admin' && (
@@ -260,6 +288,56 @@ export default function Reservations() {
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+        
+        <TabsContent value="calendar">
+          <Card>
+            <CardHeader>
+              <CardTitle>Calendario de Reservas</CardTitle>
+              <CardDescription>
+                Vista de calendario con todas las reservas del salón social
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div style={{ height: '600px' }}>
+                <Calendar
+                  localizer={localizer}
+                  events={calendarEvents}
+                  startAccessor="start"
+                  endAccessor="end"
+                  style={{ height: '100%' }}
+                  messages={{
+                    next: "Siguiente",
+                    previous: "Anterior", 
+                    today: "Hoy",
+                    month: "Mes",
+                    week: "Semana", 
+                    day: "Día",
+                    agenda: "Agenda",
+                    date: "Fecha",
+                    time: "Hora",
+                    event: "Evento",
+                    noEventsInRange: "No hay eventos en este rango",
+                    showMore: total => `+ Ver más (${total})`
+                  }}
+                  eventPropGetter={(event) => ({
+                    style: {
+                      backgroundColor: event.resource.status === 'Aprobada' ? '#22c55e' : 
+                                      event.resource.status === 'Pendiente' ? '#f59e0b' : 
+                                      event.resource.status === 'Completada' ? '#6b7280' : '#ef4444',
+                      borderRadius: '4px',
+                      opacity: 0.8,
+                      color: 'white',
+                      border: '0px',
+                      display: 'block'
+                    }
+                  })}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

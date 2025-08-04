@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,69 +7,14 @@ import { NewChargeDialog } from '@/components/dialogs/NewChargeDialog';
 import { PaymentDetailsDialog } from '@/components/dialogs/PaymentDetailsDialog';
 import { generatePaymentsReport, downloadCSV, downloadPDF } from '@/utils/reportGenerator';
 import { useToast } from '@/hooks/use-toast';
+import { usePayments } from '@/contexts/PaymentsContext';
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState([
-    { 
-      id: '1', 
-      date: '2024-01-15', 
-      apartment: 'Torre A - 301', 
-      owner: 'María González', 
-      concept: 'Administración Enero', 
-      amount: '$1,200,000', 
-      status: 'Pagado',
-      method: 'Transferencia',
-      month: 'Enero 2024'
-    },
-    { 
-      id: '2', 
-      date: '2024-01-14', 
-      apartment: 'Torre B - 205', 
-      owner: 'Carlos Ruiz', 
-      concept: 'Administración Enero', 
-      amount: '$1,200,000', 
-      status: 'Pendiente',
-      method: '-',
-      month: 'Enero 2024'
-    },
-    { 
-      id: '3', 
-      date: '2024-01-13', 
-      apartment: 'Torre A - 102', 
-      owner: 'Ana Martínez', 
-      concept: 'Administración Enero', 
-      amount: '$1,350,000', 
-      status: 'Pagado',
-      method: 'Efectivo',
-      month: 'Enero 2024'
-    },
-    { 
-      id: '4', 
-      date: '2024-01-12', 
-      apartment: 'Torre C - 401', 
-      owner: 'Luis Pérez', 
-      concept: 'Administración Enero', 
-      amount: '$1,200,000', 
-      status: 'Pagado',
-      method: 'Cheque',
-      month: 'Enero 2024'
-    },
-    { 
-      id: '5', 
-      date: '2024-01-10', 
-      apartment: 'Torre B - 105', 
-      owner: 'Pedro Silva', 
-      concept: 'Multa por ruido', 
-      amount: '$150,000', 
-      status: 'Vencido',
-      method: '-',
-      month: 'Diciembre 2023'
-    },
-  ]);
+  const { payments, addPayment } = usePayments();
   const { toast } = useToast();
 
   const handleNewCharge = (newCharge: any) => {
-    setPayments([newCharge, ...payments]);
+    addPayment(newCharge);
   };
 
   const handleExportReport = () => {
