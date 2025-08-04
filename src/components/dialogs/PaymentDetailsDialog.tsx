@@ -110,36 +110,18 @@ export function PaymentDetailsDialog({ payment, children }: PaymentDetailsDialog
           <div className="border-t pt-4">
             <h4 className="font-medium mb-2">Desglose del Pago</h4>
             <div className="space-y-2 text-sm">
-              {payment.concept.toLowerCase().includes('multa') ? (
-                <>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{payment.concept}</span>
-                    <span>{payment.amount}</span>
-                  </div>
-                </>
-              ) : payment.concept.toLowerCase().includes('administración') ? (
-                <>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Administración</span>
-                    <span>$1,000,000</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Aseo</span>
-                    <span>$150,000</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Vigilancia</span>
-                    <span>$50,000</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{payment.concept}</span>
-                    <span>{payment.amount}</span>
-                  </div>
-                </>
-              )}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Administración</span>
+                <span>$1,000,000</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Aseo</span>
+                <span>$150,000</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Vigilancia</span>
+                <span>$50,000</span>
+              </div>
               <div className="flex justify-between font-medium pt-2 border-t">
                 <span>Total</span>
                 <span>{payment.amount}</span>
