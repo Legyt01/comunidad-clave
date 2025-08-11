@@ -51,12 +51,16 @@ export const downloadCSV = (data: any[], filename: string) => {
   if (!data.length) return;
 
   const headers = Object.keys(data[0]).join(',');
-  const rows = data.map(item => 
-    Object.values(item).map(value => 
-      typeof value === 'string' && value.includes(',') 
-        ? `"${value}"` 
-        : value
-    ).join(',')
+  const rows = data.map(item =>
+    Object.values(item)
+      .map(value => {
+        if (typeof value === 'string') {
+          const sanitized = value.replace(/"/g, '""');
+          return /[",\n]/.test(value) ? `"${sanitized}"` : sanitized;
+        }
+        return value;
+      })
+      .join(',')
   );
 
   const csvContent = [headers, ...rows].join('\n');
