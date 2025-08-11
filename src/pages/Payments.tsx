@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { DollarSign, Plus, Filter, Download, TrendingUp, Building } from 'lucide-react';
 import { NewChargeDialog } from '@/components/dialogs/NewChargeDialog';
 import { PaymentDetailsDialog } from '@/components/dialogs/PaymentDetailsDialog';
-import { generatePaymentsReport, downloadCSV, downloadPDF } from '@/utils/reportGenerator';
+import { generatePaymentsReport, downloadCSV, downloadReportText } from '@/utils/reportGenerator';
 import { useToast } from '@/hooks/use-toast';
 
 export default function PaymentsPage() {
@@ -74,7 +74,7 @@ export default function PaymentsPage() {
 
   const handleExportReport = () => {
     const report = generatePaymentsReport(payments);
-    downloadPDF(report);
+    downloadReportText(report);
     toast({
       title: "Reporte generado",
       description: "El reporte de pagos se ha descargado exitosamente",

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Users, Plus, Search, Filter, Building, Mail, Phone } from 'lucide-react';
 import { NewUserDialog } from '@/components/dialogs/NewUserDialog';
-import { generateUsersReport, downloadPDF } from '@/utils/reportGenerator';
+import { generateUsersReport, downloadReportText } from '@/utils/reportGenerator';
 import { useToast } from '@/hooks/use-toast';
 
 export default function UsersPage() {
@@ -68,7 +68,7 @@ export default function UsersPage() {
 
   const handleGenerateReport = () => {
     const report = generateUsersReport(users);
-    downloadPDF(report);
+    downloadReportText(report);
     toast({
       title: "Reporte generado",
       description: "El reporte de usuarios se ha descargado exitosamente",

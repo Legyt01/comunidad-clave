@@ -74,30 +74,30 @@ export const downloadCSV = (data: any[], filename: string) => {
   window.URL.revokeObjectURL(url);
 };
 
-export const downloadPDF = (reportData: any) => {
-  // Simplified PDF generation - in a real app you'd use a library like jsPDF
+export const downloadReportText = (reportData: any) => {
+  // Download the report data as a plain text file
   const content = `
-    ${reportData.title}
-    Generado el: ${reportData.generatedAt}
-    
-    RESUMEN:
-    ${Object.entries(reportData.summary)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join('\n')}
-    
-    DATOS:
-    ${JSON.stringify(reportData, null, 2)}
-  `;
+${reportData.title}
+Generado el: ${reportData.generatedAt}
+
+RESUMEN:
+${Object.entries(reportData.summary)
+  .map(([key, value]) => `${key}: ${value}`)
+  .join('\n')}
+
+DATOS:
+${JSON.stringify(reportData, null, 2)}
+`;
 
   const blob = new Blob([content], { type: 'text/plain' });
   const url = window.URL.createObjectURL(blob);
-  
+
   const link = document.createElement('a');
   link.href = url;
   link.download = `${reportData.title.replace(/\s+/g, '_')}.txt`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   window.URL.revokeObjectURL(url);
 };
