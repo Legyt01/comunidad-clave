@@ -6,7 +6,7 @@ import { Calendar, Clock, Plus, Filter, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { NewReservationDialog } from '@/components/dialogs/NewReservationDialog';
 import { ReservationDetailsDialog } from '@/components/dialogs/ReservationDetailsDialog';
-import { generateReservationsReport, downloadPDF } from '@/utils/reportGenerator';
+import { generateReservationsReport, downloadReportText } from '@/utils/reportGenerator';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Reservations() {
@@ -82,7 +82,7 @@ export default function Reservations() {
 
   const handleGenerateReport = () => {
     const report = generateReservationsReport(reservations);
-    downloadPDF(report);
+    downloadReportText(report);
     toast({
       title: "Reporte generado",
       description: "El reporte de reservas se ha descargado exitosamente",
