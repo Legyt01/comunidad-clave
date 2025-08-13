@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Plus, Filter, MapPin } from 'lucide-react';
+import { Calendar, Clock, Plus, Filter, MapPin, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { NewReservationDialog } from '@/components/dialogs/NewReservationDialog';
 import { ReservationDetailsDialog } from '@/components/dialogs/ReservationDetailsDialog';
+import { CalendarViewDialog } from '@/components/dialogs/CalendarViewDialog';
 import { generateReservationsReport, downloadPDF } from '@/utils/reportGenerator';
 import { useToast } from '@/hooks/use-toast';
 
@@ -61,13 +62,32 @@ export default function Reservations() {
   };
 
   const handleApproveReservation = (id: string) => {
+    const reservation = reservations.find(r => r.id === id);
+    if (!reservation) return;
+
+    // Check for conflicts with other approved reservations on the same date
+    const conflicts = reservations.filter(r => 
+      r.date === reservation.date && 
+      r.status === 'Aprobada' && 
+      r.id !== id
+    );
+
     setReservations(reservations.map(r => 
       r.id === id ? { ...r, status: 'Aprobada' } : r
     ));
-    toast({
-      title: "Reserva aprobada",
-      description: "La solicitud de reserva ha sido aprobada exitosamente",
-    });
+
+    if (conflicts.length > 0) {
+      toast({
+        title: "Reserva aprobada con advertencia",
+        description: `La reserva ha sido aprobada, pero existe conflicto con ${conflicts.length} reserva(s) en la misma fecha. Revisa los horarios.`,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Reserva aprobada",
+        description: "La solicitud de reserva ha sido aprobada exitosamente",
+      });
+    }
   };
 
   const handleRejectReservation = (id: string) => {
@@ -108,6 +128,21 @@ export default function Reservations() {
     ? reservations.filter(r => r.apartment === user.apartment)
     : reservations;
 
+  // Check for date conflicts in reservations
+  const getDateConflicts = (reservation: any) => {
+    return reservations.filter(r => 
+      r.date === reservation.date && 
+      r.status === 'Aprobada' && 
+      r.id !== reservation.id
+    );
+  };
+
+  // Calculate stats dynamically
+  const pendingCount = reservations.filter(r => r.status === 'Pendiente').length;
+  const approvedCount = reservations.filter(r => r.status === 'Aprobada').length;
+  const completedCount = reservations.filter(r => r.status === 'Completada').length;
+  const occupancyRate = Math.round((approvedCount / (approvedCount + pendingCount + completedCount)) * 100) || 0;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -129,10 +164,12 @@ export default function Reservations() {
               Generar Reporte
             </Button>
           )}
-          <Button variant="outline" size="sm">
-            <Calendar className="w-4 h-4 mr-2" />
-            Ver Calendario
-          </Button>
+          <CalendarViewDialog reservations={reservations}>
+            <Button variant="outline" size="sm">
+              <Calendar className="w-4 h-4 mr-2" />
+              Ver Calendario
+            </Button>
+          </CalendarViewDialog>
           <NewReservationDialog onReservationCreated={handleNewReservation} />
         </div>
       </div>
@@ -159,7 +196,7 @@ export default function Reservations() {
           <Card>
             <CardContent className="p-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">2</p>
+                <p className="text-2xl font-bold text-foreground">{pendingCount}</p>
                 <p className="text-sm text-muted-foreground">Pendientes</p>
               </div>
             </CardContent>
@@ -167,7 +204,7 @@ export default function Reservations() {
           <Card>
             <CardContent className="p-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-success">1</p>
+                <p className="text-2xl font-bold text-success">{approvedCount}</p>
                 <p className="text-sm text-muted-foreground">Aprobadas</p>
               </div>
             </CardContent>
@@ -175,7 +212,7 @@ export default function Reservations() {
           <Card>
             <CardContent className="p-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-muted-foreground">1</p>
+                <p className="text-2xl font-bold text-muted-foreground">{completedCount}</p>
                 <p className="text-sm text-muted-foreground">Completadas</p>
               </div>
             </CardContent>
@@ -183,7 +220,7 @@ export default function Reservations() {
           <Card>
             <CardContent className="p-6">
               <div className="text-center">
-                <p className="text-2xl font-bold text-primary">85%</p>
+                <p className="text-2xl font-bold text-primary">{occupancyRate}%</p>
                 <p className="text-sm text-muted-foreground">Ocupación</p>
               </div>
             </CardContent>
@@ -226,9 +263,15 @@ export default function Reservations() {
                           {reservation.apartment} - {reservation.owner}
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground">
+                       <p className="text-xs text-muted-foreground">
                         {reservation.attendees} asistentes estimados
                       </p>
+                      {reservation.status === 'Aprobada' && getDateConflicts(reservation).length > 0 && (
+                        <div className="flex items-center space-x-1 text-xs text-destructive mt-1">
+                          <AlertTriangle className="w-3 h-3" />
+                          <span>Conflicto de horario detectado</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
